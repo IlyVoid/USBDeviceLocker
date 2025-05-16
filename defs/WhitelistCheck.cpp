@@ -42,7 +42,7 @@ void check_usb_devices() {
         SEEN_THIS_SESSION.insert(drive.serial);
 
         std::cout << "[INFO] USB Drive " << drive.letter << ":\\"
-                  << " [LABEL]: " << drive.label << ", Serial: 0x"
+                  << "[LABEL]: " << drive.label << ", Serial: 0x"
                   << std::hex << drive.serial << std::dec;
 
         if (WHITELIST.contains(drive.serial)) {

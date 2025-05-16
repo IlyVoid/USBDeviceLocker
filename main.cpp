@@ -4,7 +4,7 @@ int main() {
     std::cout <<"=== USB Device Locker ===\n" << std::endl;
     std::cout << "Monitoring extern drives every 3 seconds...\n\n" << std::endl;
 
-    load_whitelist(whitelistFile);
+    WHITELIST = load_whitelist(whitelistFile);
 
     while (true) {
         check_usb_devices();

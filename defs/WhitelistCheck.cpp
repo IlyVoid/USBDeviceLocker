@@ -34,22 +34,27 @@ void check_usb_devices() {
     auto drives = get_connected_drives();
 
     for (const auto& drive : drives) {
-        std::cout << "[INFO] USB Drive" << drive.letter << ":\\"
-        << "[LABEL]: " << drive.label << ", Serial: 0x" << std::hex << drive.serial << std::dec << ")";
+        if (SEEN_THIS_SESSION.contains(drive.serial)) {
+            continue; // Already seen, skip
+        }
+
+        // Mark as seen now
+        SEEN_THIS_SESSION.insert(drive.serial);
+
+        std::cout << "[INFO] USB Drive " << drive.letter << ":\\"
+                  << " [LABEL]: " << drive.label << ", Serial: 0x"
+                  << std::hex << drive.serial << std::dec;
 
         if (WHITELIST.contains(drive.serial)) {
             std::cout << " -- ALLOWED\n";
-        }
-        else {
-            std::cout << "-- !!! BLOCKED (Device not whitelisted)\n";
-            if (!WHITELIST.contains(drive.serial) && !SEEN_THIS_SESSION.contains(drive.serial)) {
-                SEEN_THIS_SESSION.insert(drive.serial); // marks as seen
-                if (scan_usb_for_threats(drive.letter)) {
-                    prompt_user_for_action(drive.letter, drive.serial, whitelistFile);
-                } else {
-                    std::cout << "No obvious threats found on " << drive.letter << ":\\ -- [SAFE?] Up to user.\n";
-                    prompt_user_for_action(drive.letter, drive.serial, whitelistFile);
-                }
+        } else {
+            std::cout << " -- !!! BLOCKED (Device not whitelisted)\n";
+
+            if (scan_usb_for_threats(drive.letter)) {
+                prompt_user_for_action(drive.letter, drive.serial, whitelistFile);
+            } else {
+                std::cout << "No obvious threats found on " << drive.letter << ":\\ -- [SAFE?] Up to user.\n";
+                prompt_user_for_action(drive.letter, drive.serial, whitelistFile);
             }
         }
     }

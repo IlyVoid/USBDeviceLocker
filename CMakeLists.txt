@@ -4,6 +4,10 @@ project(USBDeviceLocker)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_AUTOMOC ON)
+
+# Set Qt6 directory
+set(Qt6_DIR "C:/Qt/6.9.0/mingw_64/lib/cmake/Qt6")
+
 # Add Qt packages
 find_package(Qt6 REQUIRED COMPONENTS Widgets Core Gui Network)
 

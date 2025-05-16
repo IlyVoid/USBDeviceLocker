@@ -1,5 +1,0 @@
-C:/Users/quint/CLionProjects/USBDeviceLocker/cmake-build-debug/CMakeFiles/USBDeviceLocker.dir
-C:/Users/quint/CLionProjects/USBDeviceLocker/cmake-build-debug/CMakeFiles/edit_cache.dir
-C:/Users/quint/CLionProjects/USBDeviceLocker/cmake-build-debug/CMakeFiles/rebuild_cache.dir
-C:/Users/quint/CLionProjects/USBDeviceLocker/cmake-build-debug/CMakeFiles/USBDeviceLocker_autogen_timestamp_deps.dir
-C:/Users/quint/CLionProjects/USBDeviceLocker/cmake-build-debug/CMakeFiles/USBDeviceLocker_autogen.dir

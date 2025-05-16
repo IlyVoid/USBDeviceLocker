@@ -3,7 +3,7 @@
 **USB Device Locker** is a Windows-based security application written in modern C++23 that monitors, scans, and manages connected USB devices. It gives users control over what removable devices are allowed to interact with their system by allowing them to **whitelist trusted USB drives**, **detect unrecognized devices**, and optionally **eject unknown drives**.
 
 <p align="center">
-  <img src="https://img.shields.io/badge/C%2B%2B-26-blue?style=for-the-badge" alt="C++26 Badge"/>
+  <img src="https://img.shields.io/badge/C%2B%2B-23-blue?style=for-the-badge" alt="C++26 Badge"/>
   <img src="https://img.shields.io/badge/Platform-Windows-lightgrey?style=for-the-badge" alt="Windows Badge"/>
   <img src="https://img.shields.io/badge/CLion-Project-green?style=for-the-badge" alt="CLion Badge"/>
 </p>

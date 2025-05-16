@@ -4,11 +4,11 @@
 #include <QMainWindow>
 #include <QTimer>
 #include <QTableWidget>
+#include <QListWidget>
 #include <QVBoxLayout>
 #include <QHeaderView>
 #include <QMessageBox>
 #include <QStackedWidget>
-#include <QTabWidget>
 #include <QPushButton>
 #include <QLabel>
 #include <QIcon>
@@ -30,14 +30,16 @@ private:
     QTimer *scanTimer;
     QTableWidget *usbTable;
     QStackedWidget *stack;
-    QWidget *startScreen;
-    QTabWidget *tabs;
 
     void setupUI();
     void showDevice(char letter, const std::string& label, DWORD serial, bool allowed);
 
-    void setupStartScreen();
-    void setupTabs();
+    QWidget* createHomeTab();
+    QWidget* createDashboardTab();
+    QWidget* createWhitelistTab();
+    QWidget* createLogsTab();
+    QWidget* createSettingsTab();
+    QWidget* createHelpTab();
 };
 
 #endif // MAINWINDOW_H

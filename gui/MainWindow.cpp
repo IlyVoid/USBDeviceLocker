@@ -3,25 +3,10 @@
 MainWindow::MainWindow(QWidget *parent)
         : QMainWindow(parent) {
     setWindowTitle("USB Device Locker");
+    setWindowIcon(QIcon(":/icons/usb.png"));
     resize(900, 600);
 
-    stack = new QStackedWidget(this);
-    setCentralWidget(stack);
-
-    setupStartScreen();
-    setupTabs();
-
-    stack->addWidget(startScreen);
-    stack->addWidget(tabs);
-    stack->setCurrentWidget(startScreen);
-
-    // Switch to tabs after clicking "Open Dashboard"
-    auto startBtn = startScreen->findChild<QPushButton*>("startBtn");
-    if (startBtn) {
-        connect(startBtn, &QPushButton::clicked, [this] {
-            stack->setCurrentWidget(tabs);
-        });
-    }
+    setupUI();
 
     // Timer for auto-scanning
     scanTimer = new QTimer(this);
@@ -33,9 +18,86 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow() {}
 
-void MainWindow::setupStartScreen() {
-    startScreen = new QWidget;
-    auto *layout = new QVBoxLayout(startScreen);
+void MainWindow::setupUI() {
+    QWidget *central = new QWidget;
+    QHBoxLayout *mainLayout = new QHBoxLayout(central);
+
+    // Sidebar navigation
+    QListWidget *sidebar = new QListWidget;
+    sidebar->setIconSize(QSize(32, 32));
+    sidebar->addItem(new QListWidgetItem(QIcon(":/icons/usb.png"), "Home"));
+    sidebar->addItem(new QListWidgetItem(QIcon(":/icons/dashboard.png"), "Dashboard"));
+    sidebar->addItem(new QListWidgetItem(QIcon(":/icons/whitelist.png"), "Whitelist"));
+    sidebar->addItem(new QListWidgetItem(QIcon(":/icons/logs.png"), "Logs"));
+    sidebar->addItem(new QListWidgetItem(QIcon(":/icons/settings.png"), "Settings"));
+    sidebar->addItem(new QListWidgetItem(QIcon(":/icons/help.png"), "Help / About"));
+    sidebar->setFixedWidth(180);
+    sidebar->setCurrentRow(0);
+    sidebar->setStyleSheet(R"(
+        QListWidget {
+            background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                stop:0 #23272e, stop:1 #181a20);
+            border: none;
+            color: #e3f2fd;
+            font-size: 18px;
+            font-weight: 600;
+            outline: none;
+        }
+        QListWidget::item {
+            padding: 22px 18px;
+            border-radius: 12px;
+            margin: 6px 0;
+            transition: background 0.2s;
+        }
+        QListWidget::item:selected {
+            background: #00bcd4;
+            color: #181a20;
+            font-weight: bold;
+            border: 2px solid #00bcd4;
+            box-shadow: 0 2px 12px #00bcd488;
+        }
+        QListWidget::item:hover {
+            background: #263238;
+            color: #fff;
+        }
+    )");
+
+    // Stacked pages
+    stack = new QStackedWidget;
+    stack->addWidget(createHomeTab());
+    stack->addWidget(createDashboardTab());
+    stack->addWidget(createWhitelistTab());
+    stack->addWidget(createLogsTab());
+    stack->addWidget(createSettingsTab());
+    stack->addWidget(createHelpTab());
+
+    // Card-like main area
+    QWidget *mainCard = new QWidget;
+    QVBoxLayout *cardLayout = new QVBoxLayout(mainCard);
+    cardLayout->setContentsMargins(32, 32, 32, 32);
+    cardLayout->addWidget(stack);
+    mainCard->setStyleSheet(R"(
+        background: #23272e;
+        border-radius: 24px;
+        box-shadow: 0 8px 32px #00000044;
+    )");
+
+    mainLayout->addWidget(sidebar);
+    mainLayout->addSpacing(8);
+    mainLayout->addWidget(mainCard, 1);
+
+    central->setStyleSheet("background: #181a20;");
+    setCentralWidget(central);
+
+    // Navigation logic
+    connect(sidebar, &QListWidget::currentRowChanged, stack, &QStackedWidget::setCurrentIndex);
+}
+
+QWidget* MainWindow::createHomeTab() {
+    QWidget *home = new QWidget;
+    QVBoxLayout *layout = new QVBoxLayout(home);
+
+    home->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     QLabel *logo = new QLabel;
     logo->setPixmap(QIcon(":/icons/usb.png").pixmap(96, 96));
@@ -43,42 +105,58 @@ void MainWindow::setupStartScreen() {
 
     QLabel *title = new QLabel("USB Device Locker");
     title->setAlignment(Qt::AlignCenter);
-    title->setStyleSheet("font-size: 32px; font-weight: bold; color: #2d3748;");
+    title->setStyleSheet("font-size: 32px; font-weight: bold;");
 
-    QPushButton *startBtn = new QPushButton("Open Dashboard");
-    startBtn->setObjectName("startBtn");
-    startBtn->setFixedHeight(40);
-    startBtn->setStyleSheet("font-size: 18px; background: #3182ce; color: white; border-radius: 8px;");
+    QLabel *subtitle = new QLabel("The safety net for your USB devices");
+    subtitle->setAlignment(Qt::AlignCenter);
+    subtitle->setStyleSheet("font-size: 16px; color: #aaa;");
+
+    QLabel *desc = new QLabel("Monitor, scan, and manage your USB devices in real time.\n"
+                              "Use the navigation on the left to access the dashboard, whitelist, logs, and settings.");
+    desc->setAlignment(Qt::AlignCenter);
+    desc->setStyleSheet("font-size: 13px; color: #bbb;");
 
     layout->addStretch();
     layout->addWidget(logo);
     layout->addWidget(title);
-    layout->addSpacing(20);
-    layout->addWidget(startBtn, 0, Qt::AlignCenter);
+    layout->addWidget(subtitle);
+    layout->addSpacing(10);
+    layout->addWidget(desc);
     layout->addStretch();
 
-    startScreen->setStyleSheet("background: #f7fafc;");
+    return home;
 }
 
-void MainWindow::setupTabs() {
-    tabs = new QTabWidget;
-
-    // Dashboard tab
+QWidget* MainWindow::createDashboardTab() {
     QWidget *dashboard = new QWidget;
     QVBoxLayout *dashLayout = new QVBoxLayout(dashboard);
 
     // Action buttons
     QHBoxLayout *btnLayout = new QHBoxLayout;
-    QPushButton *refreshBtn = new QPushButton("Refresh / Scan Now");
-    QPushButton *addBtn = new QPushButton("Add to Whitelist");
-    QPushButton *removeBtn = new QPushButton("Remove from Whitelist");
-    QPushButton *ejectBtn = new QPushButton("Eject Device");
-    QPushButton *toggleBtn = new QPushButton("Disable Protection");
-    btnLayout->addWidget(refreshBtn);
-    btnLayout->addWidget(addBtn);
-    btnLayout->addWidget(removeBtn);
-    btnLayout->addWidget(ejectBtn);
-    btnLayout->addWidget(toggleBtn);
+    QPushButton *refreshBtn = new QPushButton(QIcon::fromTheme("view-refresh"), "Refresh / Scan Now");
+    QPushButton *addBtn = new QPushButton(QIcon::fromTheme("list-add"), "Add to Whitelist");
+    QPushButton *removeBtn = new QPushButton(QIcon::fromTheme("list-remove"), "Remove from Whitelist");
+    QPushButton *ejectBtn = new QPushButton(QIcon::fromTheme("media-eject"), "Eject Device");
+    QPushButton *toggleBtn = new QPushButton(QIcon::fromTheme("security-high"), "Disable Protection");
+
+    QList<QPushButton*> btns = {refreshBtn, addBtn, removeBtn, ejectBtn, toggleBtn};
+    for (auto btn : btns) {
+        btn->setStyleSheet(R"(
+            QPushButton {
+                background: #31363f;
+                color: #fff;
+                border: none;
+                border-radius: 6px;
+                padding: 10px 24px;
+                font-size: 15px;
+            }
+            QPushButton:hover {
+                background: #00bcd4;
+                color: #23272e;
+            }
+        )");
+        btnLayout->addWidget(btn);
+    }
 
     // USB Table
     usbTable = new QTableWidget(0, 4);
@@ -86,35 +164,34 @@ void MainWindow::setupTabs() {
     usbTable->setSelectionMode(QAbstractItemView::SingleSelection);
     usbTable->setHorizontalHeaderLabels({"Drive", "Label", "Serial", "Status"});
     usbTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    usbTable->setAlternatingRowColors(true);
+    usbTable->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    usbTable->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
+    usbTable->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+
+    usbTable->setStyleSheet(R"(
+        QTableWidget, QHeaderView::section {
+            background: #23272e;
+            color: #cfd8dc;
+            font-size: 15px;
+            border-radius: 8px;
+        }
+        QHeaderView::section {
+            background: #31363f;
+            color: #fff;
+            font-weight: bold;
+            border: none;
+            padding: 8px;
+        }
+        QTableWidget::item:selected {
+            background: #00bcd4;
+            color: #23272e;
+        }
+    )");
 
     dashLayout->addLayout(btnLayout);
     dashLayout->addWidget(usbTable);
-
-    // Whitelist Management tab
-    QWidget *whitelist = new QWidget;
-    QVBoxLayout *wlLayout = new QVBoxLayout(whitelist);
-    wlLayout->addWidget(new QLabel("Manage Whitelist (coming soon)"));
-
-    // Logs tab
-    QWidget *logs = new QWidget;
-    QVBoxLayout *logLayout = new QVBoxLayout(logs);
-    logLayout->addWidget(new QLabel("Scan History / Logs (coming soon)"));
-
-    // Settings tab
-    QWidget *settings = new QWidget;
-    QVBoxLayout *setLayout = new QVBoxLayout(settings);
-    setLayout->addWidget(new QLabel("Settings (coming soon)"));
-
-    // Help/About tab
-    QWidget *help = new QWidget;
-    QVBoxLayout *helpLayout = new QVBoxLayout(help);
-    helpLayout->addWidget(new QLabel("USB Device Locker\nVersion 1.0\n(c) 2024"));
-
-    tabs->addTab(dashboard, QIcon::fromTheme("view-dashboard"), "Dashboard");
-    tabs->addTab(whitelist, QIcon::fromTheme("list-add"), "Whitelist");
-    tabs->addTab(logs, QIcon::fromTheme("document-open"), "Logs");
-    tabs->addTab(settings, QIcon::fromTheme("settings"), "Settings");
-    tabs->addTab(help, QIcon::fromTheme("help-about"), "Help / About");
+    dashboard->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     // Button connections
 
@@ -184,6 +261,42 @@ void MainWindow::setupTabs() {
         toggleBtn->setText(protectionEnabled ? "Disable Protection" : "Enable Protection");
         QMessageBox::information(this, "Protection", protectionEnabled ? "Protection enabled." : "Protection disabled.");
     });
+
+    return dashboard;
+}
+
+QWidget* MainWindow::createWhitelistTab() {
+    QWidget *whitelist = new QWidget;
+    QVBoxLayout *wlLayout = new QVBoxLayout(whitelist);
+    wlLayout->addWidget(new QLabel("Manage Whitelist (coming soon)"));
+    whitelist->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    return whitelist;
+}
+
+QWidget* MainWindow::createLogsTab() {
+    QWidget *logs = new QWidget;
+    QVBoxLayout *logLayout = new QVBoxLayout(logs);
+    logLayout->addWidget(new QLabel("Scan History / Logs (coming soon)"));
+    logs->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    return logs;
+}
+
+QWidget* MainWindow::createSettingsTab() {
+    QWidget *settings = new QWidget;
+    QVBoxLayout *setLayout = new QVBoxLayout(settings);
+    setLayout->addWidget(new QLabel("Settings (coming soon)"));
+    settings->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    return settings;
+}
+
+QWidget* MainWindow::createHelpTab() {
+    QWidget *help = new QWidget;
+    QVBoxLayout *helpLayout = new QVBoxLayout(help);
+    QLabel *about = new QLabel("USB Device Locker\nVersion 1.0\n(c) 2024");
+    about->setAlignment(Qt::AlignCenter);
+    helpLayout->addWidget(about);
+    help->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    return help;
 }
 
 void MainWindow::showDevice(char letter, const std::string &label, DWORD serial, bool allowed) {
@@ -192,7 +305,9 @@ void MainWindow::showDevice(char letter, const std::string &label, DWORD serial,
     usbTable->setItem(row, 0, new QTableWidgetItem(QString(letter) + ":\\"));
     usbTable->setItem(row, 1, new QTableWidgetItem(QString::fromStdString(label)));
     usbTable->setItem(row, 2, new QTableWidgetItem(QString::number(serial, 16).toUpper()));
-    usbTable->setItem(row, 3, new QTableWidgetItem(allowed ? "Allowed" : "Blocked"));
+    auto statusItem = new QTableWidgetItem(allowed ? "Allowed" : "Blocked");
+    statusItem->setForeground(allowed ? Qt::green : Qt::red);
+    usbTable->setItem(row, 3, statusItem);
 }
 
 void MainWindow::scan_usb() {

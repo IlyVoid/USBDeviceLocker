@@ -1,0 +1,20 @@
+Starting eject_usb_device for drive E
+Volume locked successfully.
+Volume dismounted successfully.
+USB drive E:\ successfully ejected.
+Starting eject_usb_device for drive E
+Volume locked successfully.
+Volume dismounted successfully.
+USB drive E:\ successfully ejected.
+Starting eject_usb_device for drive E
+Volume locked successfully.
+Volume dismounted successfully.
+USB drive E:\ successfully ejected.
+Starting eject_usb_device for drive E
+Volume locked successfully.
+Volume dismounted successfully.
+USB drive E:\ successfully ejected.
+Starting eject_usb_device for drive D
+Volume locked successfully.
+Volume dismounted successfully.
+USB drive D:\ successfully ejected.

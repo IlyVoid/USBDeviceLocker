@@ -21,6 +21,7 @@ using namespace std::chrono_literals;
 
 // Whitelist of allowed USB Volume serial numbers (hex dec)
 extern std::unordered_set<DWORD> WHITELIST;
+extern std::unordered_set<DWORD> SEEN_THIS_SESSION; // <-- Add this line
 const std::string whitelistFile = "../SavedData/whitelist.txt";
 
 // Get a list of connected removable drives and their serials

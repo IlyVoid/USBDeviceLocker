@@ -3,24 +3,39 @@ project(USBDeviceLocker)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_AUTOMOC ON)
+# Add Qt packages
+find_package(Qt6 REQUIRED COMPONENTS Widgets Core Gui Network)
 
-add_executable(USBDeviceLocker main.cpp
+# Define executable
+add_executable(USBDeviceLocker
+        main.cpp
         defs/WhitelistCheck.cpp
         class/main.h
         defs/Scanner.cpp
         defs/prompter.cpp
         defs/Ejection.cpp
-        defs/AddToWhitelist.cpp)
+        defs/AddToWhitelist.cpp
+        gui/MainWindow.cpp
+        gui/MainWindow.h
+)
 
-# Force MSVC to use latest draft feats.
+# Use latest draft for MSVC
 if (MSVC)
     target_compile_options(USBDeviceLocker PRIVATE /std:c++latest)
 endif()
 
-# GCC/Clang
-if (CMAKE_CXX_COMPILER_ID MATCHES "Clang | GNU")
-    target_compile_options(USBDeviceLocker PRIVATE -std=c++2c)
-endif ()
+# Use C++2c for GCC/Clang
+if (CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
+    target_compile_options(USBDeviceLocker PRIVATE -std=c++23)
+endif()
 
-# Linking Win Libs
-target_link_libraries(USBDeviceLocker setupapi)
+# Link libraries with correct keyword style
+target_link_libraries(USBDeviceLocker
+        PRIVATE
+        Qt6::Widgets
+        Qt6::Core
+        Qt6::Gui
+        Qt6::Network
+        setupapi
+)
